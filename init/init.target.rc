@@ -221,17 +221,18 @@ service fan_control_turn_off /vendor/bin/fan_service 0
 # 说明：
 #   1) init 不会解析 /vendor/etc/init/*.rc 里自定义的 service，
 #      新服务必须写进被 init.qcom.rc 显式 import 的 init.target.rc。
-#   2) 脚本是 vendor_file 标签，不能直接当作 service 的可执行文件，
-#      因此通过 /vendor/bin/sh 执行。
-#   3) 需要 su 域才能读 /proc/tristatekey/tri_state 并调用 cmd audio；
-#      vendor_shell / vendor_qti_init_shell 都缺少这些权限。
-service alert-slider /vendor/bin/sh /vendor/bin/alert-slider.sh
+#   2) 通过 /system/bin/sh 拉起脚本：init.te 中有
+#      domain_trans(init, shell_exec, shell)，服务会自动进入 shell 域。
+#   3) 不要用 seclabel u:r:su:s0 —— su 域被 userdebug_or_eng() 包裹，
+#      只在 userdebug/eng 构建中存在；user 构建里服务起不来，
+#      表现为「user 构建完拨动键失效」。
+service alert-slider /system/bin/sh /system_ext/bin/alert-slider.sh
     class late_start
-    user root
-    group root system
-    seclabel u:r:su:s0
+    user shell
+    group shell system input
     oneshot
     disabled
 
 on property:sys.boot_completed=1
     start alert-slider
+
