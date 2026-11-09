@@ -216,23 +216,19 @@ service fan_control_turn_off /vendor/bin/fan_service 0
     disabled
     oneshot
 
-# 一加三段式拨动键：上=静音 中=振动 下=响铃
-#
-# 说明：
-#   1) init 不会解析 /vendor/etc/init/*.rc 里自定义的 service，
-#      新服务必须写进被 init.qcom.rc 显式 import 的 init.target.rc。
-#   2) 通过 /system/bin/sh 拉起脚本：init.te 中有
-#      domain_trans(init, shell_exec, shell)，服务会自动进入 shell 域。
-#   3) 不要用 seclabel u:r:su:s0 —— su 域被 userdebug_or_eng() 包裹，
-#      只在 userdebug/eng 构建中存在；user 构建里服务起不来，
-#      表现为「user 构建完拨动键失效」。
+
+
+
+# 一加三段式拨动键：1=静音 2=振动 3=响铃
+# 通过 /system/bin/sh 启动，进入 shell 域（init.te: domain_trans(init, shell_exec, shell)），
+# shell 域可执行 cmd audio 并读取 /dev/input。
 service alert-slider /system/bin/sh /system_ext/bin/alert-slider.sh
     class late_start
     user shell
     group shell system input
+    seclabel u:r:shell:s0
     oneshot
     disabled
 
-on property:sys.boot_completed=1
+on boot
     start alert-slider
-
