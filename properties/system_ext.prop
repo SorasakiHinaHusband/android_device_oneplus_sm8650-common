@@ -23,7 +23,8 @@ persist.bluetooth.snooplogfilter.profiles.map=fullfilter
 persist.bluetooth.snooplogfilter.profiles.pbap=fullfilter
 persist.bluetooth.snooplogfilter.profiles.rfcomm.enabled=true
 persist.vendor.btstack.enable.lpa=true
-ro.bluetooth.leaudio_offload.supported=false
+ro.bluetooth.leaudio_offload.supported=true
+ro.bluetooth.leaudio_switcher.supported=true
 
 # CNE
 persist.vendor.cne.feature=1
